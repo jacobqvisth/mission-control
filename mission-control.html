@@ -450,7 +450,15 @@
           `;
         }).join('');
       } catch {
-        el.innerHTML = '<div class="small">Session list is only available when running local Mission Control server (`node server.js`).</div>';
+        el.innerHTML = `
+          <div class="item">
+            <div>
+              <strong>No local runtime connected</strong>
+              <div class="small">This cloud site cannot read your private OpenClaw session store directly.</div>
+              <div class="small">Use local Mission Control for live sessions: <a href="http://localhost:8899" target="_blank" rel="noopener">http://localhost:8899</a></div>
+            </div>
+          </div>
+        `;
       }
     }
 
