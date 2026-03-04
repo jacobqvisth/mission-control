@@ -28,6 +28,7 @@ Open: http://localhost:8899
 - `GET /mc/emails?account=jacob.qvisth@gmail.com&max=12`
 - `GET /mc/activity`
 - `POST /mc/activity`
+- `GET /mc/sessions?active=10080`
 
 ## 4) Optional auto-start on macOS login
 

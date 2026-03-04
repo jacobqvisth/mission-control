@@ -80,6 +80,52 @@ function getImportantEmails(account, max = 10) {
   });
 }
 
+function parseSessionKey(key = '') {
+  const parts = key.split(':');
+  const out = { raw: key, surface: 'other', chatType: null, chatId: null, topicId: null };
+  const telegramIndex = parts.indexOf('telegram');
+  if (telegramIndex >= 0) {
+    out.surface = 'telegram';
+    out.chatType = parts[telegramIndex + 1] || null;
+    out.chatId = parts[telegramIndex + 2] || null;
+    const topicMarker = parts.indexOf('topic');
+    if (topicMarker >= 0) out.topicId = parts[topicMarker + 1] || null;
+  }
+  return out;
+}
+
+function getSessions(activeMinutes = 1440) {
+  return new Promise((resolve, reject) => {
+    const args = ['sessions', '--json', '--active', String(activeMinutes), '--all-agents'];
+    execFile('openclaw', args, { timeout: 20000 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      try {
+        const parsed = JSON.parse(stdout);
+        const sessions = (parsed.sessions || []).map(s => {
+          const meta = parseSessionKey(s.key);
+          return {
+            key: s.key,
+            updatedAt: s.updatedAt,
+            ageMs: s.ageMs,
+            kind: s.kind,
+            model: s.model || null,
+            totalTokens: s.totalTokens ?? null,
+            agentId: s.agentId || null,
+            ...meta
+          };
+        });
+        resolve({
+          count: sessions.length,
+          activeMinutes,
+          sessions
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+}
+
 if (!fs.existsSync(DATA_FILE)) writeJson(DATA_FILE, {});
 if (!fs.existsSync(ACTIVITY_FILE)) writeJson(ACTIVITY_FILE, []);
 
@@ -136,6 +182,15 @@ const server = http.createServer(async (req, res) => {
       });
     } catch (e) {
       return send(res, 502, { error: 'Email fetch failed', detail: e.message });
+    }
+  }
+
+  if (req.method === 'GET' && u.pathname === '/mc/sessions') {
+    const active = Number(u.searchParams.get('active') || 1440);
+    try {
+      return send(res, 200, await getSessions(active));
+    } catch (e) {
+      return send(res, 502, { error: 'Session fetch failed', detail: e.message });
     }
   }
 

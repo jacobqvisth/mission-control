@@ -167,6 +167,17 @@
       </div>
     </section>
 
+    <section id="sessions">
+      <div class="glass card">
+        <h3>🧵 Live Sessions</h3>
+        <div class="small" style="margin-bottom:.75rem;">Shows active OpenClaw sessions (including Telegram topics) from local runtime.</div>
+        <div id="sessionList" class="list"></div>
+        <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button id="refreshSessions" class="btn">Refresh sessions</button>
+        </div>
+      </div>
+    </section>
+
     <section id="notes">
       <div class="glass card">
         <h3>Notes</h3>
@@ -220,6 +231,7 @@
         ['projects', '📋 Projects'],
         ['timeline', '📅 Timeline'],
         ['command-center', '🏢 Command Center'],
+        ['sessions', '🧵 Sessions'],
         ['notes', '📝 Notes'],
       ];
       const nav = document.getElementById('tabs');
@@ -413,6 +425,35 @@
       `).join('');
     }
 
+    async function renderSessions() {
+      const el = document.getElementById('sessionList');
+      try {
+        const r = await fetch('/mc/sessions?active=10080');
+        if (!r.ok) throw new Error('unavailable');
+        const data = await r.json();
+        const sessions = (data.sessions || []).filter(s => s.surface === 'telegram' || s.key.includes(':main'));
+        if (!sessions.length) {
+          el.innerHTML = '<div class="small">No active sessions found.</div>';
+          return;
+        }
+        el.innerHTML = sessions.map(s => {
+          const topicText = s.topicId ? `topic ${s.topicId}` : (s.chatId ? `chat ${s.chatId}` : s.kind || 'session');
+          const ageMin = Math.max(0, Math.round((s.ageMs || 0) / 60000));
+          return `
+            <div class="item">
+              <div>
+                <strong>${topicText}</strong>
+                <div class="small">${s.key}</div>
+              </div>
+              <div class="small">${ageMin}m ago</div>
+            </div>
+          `;
+        }).join('');
+      } catch {
+        el.innerHTML = '<div class="small">Session list is only available when running local Mission Control server (`node server.js`).</div>';
+      }
+    }
+
     function wireNotes() {
       const area = document.getElementById('notesArea');
       area.value = state.notes || '';
@@ -439,8 +480,10 @@
 
     setInterval(renderClock, 1000);
     setInterval(fetchEmails, 120000);
-    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); renderCommandCenter(); wireNotes(); fetchEmails();
+    setInterval(renderSessions, 120000);
+    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); renderCommandCenter(); renderSessions(); wireNotes(); fetchEmails();
     document.getElementById('refreshChecks').onclick = renderCommandCenter;
+    document.getElementById('refreshSessions').onclick = renderSessions;
   </script>
 </body>
 </html>
