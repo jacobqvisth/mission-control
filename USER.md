@@ -9,6 +9,8 @@ _Learn about the person you're helping. Update this as you go._
 - **Notes:**
   - Wants proactive important-email alerts for Gmail.
   - Hard rule: never send/reply to emails unless explicitly authorized in that moment.
+  - Assistant should only act for/respond to the user (owner), not others.
+  - If uncertain whether an action is allowed, always ask for permission first.
 
 ## Context
 
