@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jacob Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --panel: rgba(255, 255, 255, 0.05);
+      --panel-2: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #e8e8ef;
+      --muted: #a0a0b2;
+      --accent: #00d4aa;
+      --danger: #ff5f6d;
+      --warn: #ffb347;
+      --ok: #27d17f;
+      --radius: 16px;
+      --shadow: 0 12px 40px rgba(0,0,0,.4);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at 20% 0%, #0e0f1f 0%, var(--bg) 35%); color: var(--text); }
+    .container { max-width: 1600px; margin: 0 auto; padding: 1.25rem 2rem 2rem; }
+    .glass { background: var(--panel); border: 1px solid var(--border); backdrop-filter: blur(12px); border-radius: var(--radius); box-shadow: var(--shadow); }
+    header { position: sticky; top: 0; z-index: 9; margin-bottom: 1rem; }
+    .topbar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; padding: .8rem 1rem; }
+    .brand { display: flex; align-items: center; gap: .6rem; font-weight: 700; }
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--ok); box-shadow: 0 0 14px var(--ok); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0% {opacity:.55;} 50% {opacity:1;} 100% {opacity:.55;} }
+    nav { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+    .tab { border: 1px solid var(--border); color: var(--muted); background: transparent; border-radius: 12px; padding: .45rem .7rem; cursor: pointer; }
+    .tab.active { color: #fff; border-color: color-mix(in oklab, var(--accent), white 10%); box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent), black 20%) inset; }
+    .searchWrap { justify-self: end; display: flex; align-items: center; gap: .65rem; }
+    .search { width: 270px; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: .5rem .65rem; }
+    .clock { font-size: .86rem; color: var(--muted); }
+
+    section { display: none; animation: fade .35s ease; }
+    section.active { display: block; }
+    @keyframes fade { from { opacity:0; transform: translateY(8px);} to {opacity:1; transform: translateY(0);} }
+
+    .welcome { padding: 1rem 1.1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .welcome h1 { margin: 0; font-size: 1.2rem; }
+    .sub { color: var(--muted); font-size: .92rem; }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; }
+    .metric { padding: .9rem; position: relative; overflow: hidden; }
+    .metric:before { content:""; position: absolute; top:0; left:0; right:0; height:3px; background: var(--accent); }
+    .m-label { color: var(--muted); font-size: .85rem; }
+    .m-value { font-size: 1.35rem; font-weight: 700; margin-top: .25rem; }
+
+    .dashboard-row { margin-top: 1rem; display: grid; grid-template-columns: 1.3fr .9fr; gap: 1rem; }
+    .card { padding: 1rem; }
+    .card h3 { margin: 0 0 .8rem; font-size: 1rem; }
+    .list { display: flex; flex-direction: column; gap: .55rem; max-height: 280px; overflow: auto; }
+    .item { border:1px solid var(--border); border-radius: 10px; padding: .55rem .65rem; display: flex; justify-content: space-between; gap: .8rem; }
+    .small { font-size: .8rem; color: var(--muted); }
+
+    .priorityRow { display: flex; gap: .5rem; margin-bottom: .55rem; }
+    .input, textarea, select { width: 100%; background: rgba(255,255,255,.04); color: var(--text); border:1px solid var(--border); border-radius: 10px; padding: .5rem .6rem; }
+    .btn { background: color-mix(in oklab, var(--accent), black 20%); border: none; color: #042a22; font-weight: 700; border-radius: 10px; padding: .5rem .75rem; cursor: pointer; }
+    .btn.ghost { background: transparent; border:1px solid var(--border); color: var(--text); }
+
+    .kanban { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
+    .col h3 { margin-top: 0; }
+    .task { border:1px solid var(--border); background: rgba(255,255,255,.03); border-radius: 12px; padding: .7rem; margin-bottom: .6rem; }
+    .task .meta { display:flex; justify-content:space-between; gap:.5rem; font-size:.78rem; color:var(--muted); }
+    .badge { border-radius: 999px; padding: .15rem .45rem; font-size: .75rem; font-weight: 600; }
+    .high { background: rgba(255,95,109,.2); color: #ffc5cb; }
+    .medium { background: rgba(255,179,71,.2); color: #ffd9a2; }
+    .low { background: rgba(39,209,127,.2); color: #b9ffd9; }
+
+    .timeline { display: grid; gap: .8rem; }
+    .phase { padding: .9rem; border-left: 3px solid var(--border); }
+    .phase.current { border-left-color: var(--accent); box-shadow: 0 0 22px rgba(0,212,170,.15) inset; }
+
+    .notes-meta { display:flex; justify-content: space-between; color: var(--muted); font-size: .84rem; margin-top: .5rem; }
+
+    @media (max-width: 1100px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-row { grid-template-columns: 1fr; }
+      .kanban { grid-template-columns: 1fr; }
+      .topbar { grid-template-columns: 1fr; }
+      .searchWrap { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="glass topbar">
+      <div class="brand"><span>🛰️</span><span>Jacob Mission Control</span></div>
+      <nav id="tabs"></nav>
+      <div class="searchWrap">
+        <input id="globalSearch" class="search" placeholder="Search (Cmd/Ctrl+K)" />
+        <span class="dot" title="online"></span>
+        <span id="clock" class="clock"></span>
+      </div>
+    </header>
+
+    <section id="dashboard" class="active">
+      <div class="glass welcome">
+        <div>
+          <h1 id="greeting">Good day, Jacob</h1>
+          <div class="sub">Qvisth Mission Control · Primary goal: Build a calm, high-output operating system</div>
+        </div>
+        <div class="sub" id="todayLabel"></div>
+      </div>
+      <div class="grid-4" id="metrics"></div>
+      <div class="dashboard-row">
+        <div class="glass card">
+          <h3>Recent Activity</h3>
+          <div class="list" id="activityList"></div>
+        </div>
+        <div class="glass card">
+          <h3>Top Priorities</h3>
+          <div class="priorityRow">
+            <input id="priorityInput" class="input" placeholder="Add priority" />
+            <button id="addPriority" class="btn">Add</button>
+          </div>
+          <div class="list" id="priorityList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="kanban" id="kanban"></div>
+    </section>
+
+    <section id="timeline">
+      <div class="glass card">
+        <h3>Roadmap</h3>
+        <div class="timeline" id="timelineList"></div>
+      </div>
+    </section>
+
+    <section id="notes">
+      <div class="glass card">
+        <h3>Notes</h3>
+        <textarea id="notesArea" rows="20" placeholder="Capture ideas, commands, drafts..."></textarea>
+        <div class="notes-meta">
+          <span id="charCount">0 chars</span>
+          <span id="savedAt">Not saved yet</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const KEY = 'jacob-mission-control-v1';
+    const defaults = {
+      goalMetric: { label: 'Important emails pending', value: 0, trend: 'Live from Gmail hooks' },
+      priorities: [
+        { text: 'Review urgent emails and decide responses', done: false },
+        { text: 'Execute top 1 project task', done: false },
+      ],
+      activity: [
+        { text: 'Mission Control initialized', ts: Date.now() },
+      ],
+      tasks: {
+        backlog: [],
+        progress: [],
+        done: [],
+      },
+      notes: '',
+      timeline: [
+        { title: 'Phase 1: Foundation', range: 'Now', desc: 'Core channels and alerts online', milestones: ['Telegram + WhatsApp online', 'Gmail monitoring online'], current: true },
+        { title: 'Phase 2: Operating Rhythm', range: 'Next 2 weeks', desc: 'Daily brief cadence and decision logging', milestones: ['Important email rules tuned', 'Morning + evening brief'], current: false },
+        { title: 'Phase 3: Delegation Engine', range: 'Next month', desc: 'Automate repetitive work with guardrails', milestones: ['Task templates', 'Weekly review flow'], current: false }
+      ]
+    };
+
+    const state = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(defaults);
+    const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+    const fmt = ts => new Date(ts).toLocaleString();
+
+    function addActivity(text) {
+      state.activity.unshift({ text, ts: Date.now() });
+      state.activity = state.activity.slice(0, 100);
+      save();
+      renderActivity();
+    }
+
+    function renderTabs() {
+      const tabs = [
+        ['dashboard', '📊 Dashboard'],
+        ['projects', '📋 Projects'],
+        ['timeline', '📅 Timeline'],
+        ['notes', '📝 Notes'],
+      ];
+      const nav = document.getElementById('tabs');
+      nav.innerHTML = tabs.map(([id, label], i) => `<button class="tab ${i===0?'active':''}" data-tab="${id}">${label}</button>`).join('');
+      nav.addEventListener('click', e => {
+        const b = e.target.closest('.tab'); if (!b) return;
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.getElementById(b.dataset.tab).classList.add('active');
+      });
+    }
+
+    function renderClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString();
+      document.getElementById('todayLabel').textContent = now.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+      const h = now.getHours();
+      const p = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+      document.getElementById('greeting').textContent = `Good ${p}, Jacob`;
+    }
+
+    function renderMetrics() {
+      const activeProjects = state.tasks.backlog.length + state.tasks.progress.length;
+      const tasksToday = state.priorities.filter(p => !p.done).length;
+      const deadline = new Date('2026-12-31');
+      const days = Math.max(0, Math.ceil((deadline - Date.now()) / (1000*60*60*24)));
+      const list = [
+        [state.goalMetric.label, state.goalMetric.value, state.goalMetric.trend],
+        ['Active Projects', activeProjects, 'Backlog + In Progress'],
+        ['Tasks Today', tasksToday, 'Unchecked priorities'],
+        ['Days to 2026 goal', days, 'Countdown'],
+      ];
+      document.getElementById('metrics').innerHTML = list.map(([l,v,t]) => `
+        <div class="glass metric"><div class="m-label">${l}</div><div class="m-value">${v}</div><div class="small">${t}</div></div>
+      `).join('');
+    }
+
+    function renderActivity() {
+      document.getElementById('activityList').innerHTML = state.activity.map(a => `
+        <div class="item"><span>${a.text}</span><span class="small">${fmt(a.ts)}</span></div>
+      `).join('') || '<div class="small">No activity yet.</div>';
+    }
+
+    function renderPriorities() {
+      const el = document.getElementById('priorityList');
+      el.innerHTML = state.priorities.map((p, i) => `
+        <div class="item">
+          <label><input type="checkbox" data-i="${i}" ${p.done ? 'checked' : ''}/> ${p.text}</label>
+          <button class="btn ghost" data-del="${i}">Delete</button>
+        </div>
+      `).join('');
+      el.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => {
+        state.priorities[cb.dataset.i].done = cb.checked; save(); renderPriorities(); renderMetrics();
+      });
+      el.querySelectorAll('button[data-del]').forEach(btn => btn.onclick = () => {
+        state.priorities.splice(btn.dataset.del, 1); save(); renderPriorities(); renderMetrics(); addActivity('Priority removed');
+      });
+    }
+
+    function taskCard(t, col, i) {
+      return `<div class="task">
+        <div><strong>${t.title}</strong></div>
+        <div class="small">${t.desc || ''}</div>
+        <div class="meta"><span class="badge ${t.priority}">${t.priority}</span><span>${new Date(t.createdAt).toLocaleDateString()}</span></div>
+        <div style="display:flex;gap:.4rem;margin-top:.5rem;">
+          <button class="btn ghost" data-move="${col}:${i}">Move →</button>
+          <button class="btn ghost" data-drop="${col}:${i}">Delete</button>
+        </div>
+      </div>`;
+    }
+
+    function renderKanban() {
+      const cols = [ ['backlog','Backlog'], ['progress','In Progress'], ['done','Done'] ];
+      const wrap = document.getElementById('kanban');
+      wrap.innerHTML = cols.map(([k,label]) => `
+        <div class="glass card col">
+          <h3>${label}</h3>
+          <div style="display:flex;gap:.4rem;margin-bottom:.6rem;">
+            <input class="input" id="new-${k}" placeholder="Task title" />
+            <select id="prio-${k}"><option value="high">high</option><option value="medium" selected>medium</option><option value="low">low</option></select>
+            <button class="btn" data-add="${k}">Add</button>
+          </div>
+          ${(state.tasks[k]||[]).map((t,i)=>taskCard(t,k,i)).join('') || '<div class="small">No tasks</div>'}
+        </div>
+      `).join('');
+
+      wrap.querySelectorAll('button[data-add]').forEach(b => b.onclick = () => {
+        const k = b.dataset.add;
+        const title = document.getElementById(`new-${k}`).value.trim();
+        const priority = document.getElementById(`prio-${k}`).value;
+        if (!title) return;
+        state.tasks[k].push({ title, desc: '', priority, createdAt: Date.now() });
+        save(); renderKanban(); renderMetrics(); addActivity(`Task added in ${k}: ${title}`);
+      });
+
+      wrap.querySelectorAll('button[data-move]').forEach(b => b.onclick = () => {
+        const [k,i] = b.dataset.move.split(':');
+        const order = ['backlog','progress','done'];
+        const idx = order.indexOf(k); const next = order[Math.min(idx+1,2)];
+        const [task] = state.tasks[k].splice(Number(i),1); state.tasks[next].push(task);
+        save(); renderKanban(); renderMetrics(); addActivity(`Task moved to ${next}: ${task.title}`);
+      });
+      wrap.querySelectorAll('button[data-drop]').forEach(b => b.onclick = () => {
+        const [k,i] = b.dataset.drop.split(':');
+        const [task] = state.tasks[k].splice(Number(i),1);
+        save(); renderKanban(); renderMetrics(); addActivity(`Task deleted: ${task.title}`);
+      });
+    }
+
+    function renderTimeline() {
+      document.getElementById('timelineList').innerHTML = state.timeline.map(p => `
+        <div class="glass phase ${p.current ? 'current' : ''}">
+          <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:center;">
+            <strong>${p.title}</strong><span class="small">${p.range}</span>
+          </div>
+          <div class="small" style="margin:.4rem 0 .55rem;">${p.desc}</div>
+          <ul>${p.milestones.map(m=>`<li>${m}</li>`).join('')}</ul>
+        </div>
+      `).join('');
+    }
+
+    function wireNotes() {
+      const area = document.getElementById('notesArea');
+      area.value = state.notes || '';
+      const sync = () => {
+        state.notes = area.value; save();
+        document.getElementById('charCount').textContent = `${area.value.length} chars`;
+        document.getElementById('savedAt').textContent = `Saved ${new Date().toLocaleTimeString()}`;
+      };
+      area.addEventListener('input', sync); sync();
+    }
+
+    document.getElementById('addPriority').onclick = () => {
+      const i = document.getElementById('priorityInput');
+      const text = i.value.trim(); if (!text) return;
+      state.priorities.unshift({ text, done:false }); i.value = '';
+      save(); renderPriorities(); renderMetrics(); addActivity(`Priority added: ${text}`);
+    };
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault(); document.getElementById('globalSearch').focus();
+      }
+    });
+
+    setInterval(renderClock, 1000);
+    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); wireNotes();
+  </script>
+</body>
+</html>
