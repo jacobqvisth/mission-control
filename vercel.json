@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/openclaw-setup-site/index.html"
+      "destination": "/mission-control.html"
     }
   ]
 }
