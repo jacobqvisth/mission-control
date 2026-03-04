@@ -109,6 +109,10 @@
         <div class="sub" id="todayLabel"></div>
       </div>
       <div class="grid-4" id="metrics"></div>
+      <div class="glass card" style="margin-top:1rem;">
+        <h3>Important Inbox</h3>
+        <div class="list" id="emailList"></div>
+      </div>
       <div class="dashboard-row">
         <div class="glass card">
           <h3>Recent Activity</h3>
@@ -232,6 +236,38 @@
       `).join('') || '<div class="small">No activity yet.</div>';
     }
 
+    function renderEmails(items = [], fetchedAt = null) {
+      const el = document.getElementById('emailList');
+      if (!items.length) {
+        el.innerHTML = '<div class="small">No important inbox emails found right now.</div>';
+        return;
+      }
+      el.innerHTML = items.map(e => `
+        <div class="item">
+          <div>
+            <div><strong>${e.subject || '(No subject)'}</strong></div>
+            <div class="small">${e.from || 'Unknown sender'} · ${e.date || ''}</div>
+          </div>
+          <div class="small">${(e.labels || []).includes('UNREAD') ? 'UNREAD' : 'read'}</div>
+        </div>
+      `).join('') + (fetchedAt ? `<div class="small" style="margin-top:.4rem;">Last sync: ${new Date(fetchedAt).toLocaleTimeString()}</div>` : '');
+    }
+
+    async function fetchEmails() {
+      try {
+        const r = await fetch('/mc/emails?account=jacob.qvisth@gmail.com&max=12');
+        if (!r.ok) throw new Error('bad status');
+        const data = await r.json();
+        state.goalMetric.value = data.unread ?? data.count ?? 0;
+        state.goalMetric.trend = `${data.count || 0} important in inbox`;
+        save();
+        renderMetrics();
+        renderEmails(data.emails || [], data.fetchedAt);
+      } catch {
+        renderEmails([], null);
+      }
+    }
+
     function renderPriorities() {
       const el = document.getElementById('priorityList');
       el.innerHTML = state.priorities.map((p, i) => `
@@ -335,7 +371,8 @@
     });
 
     setInterval(renderClock, 1000);
-    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); wireNotes();
+    setInterval(fetchEmails, 120000);
+    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); wireNotes(); fetchEmails();
   </script>
 </body>
 </html>

@@ -2,6 +2,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 
 const PORT = 8899;
 const ROOT = __dirname;
@@ -55,6 +56,30 @@ function getWeather(city) {
   });
 }
 
+function getImportantEmails(account, max = 10) {
+  return new Promise((resolve, reject) => {
+    const query = 'in:inbox is:important';
+    const args = ['gmail', 'search', '-a', account, query, '--json', '--max', String(max)];
+    execFile('gog', args, { timeout: 20000 }, (err, stdout, stderr) => {
+      if (err) return reject(new Error(stderr || err.message));
+      try {
+        const parsed = JSON.parse(stdout);
+        const threads = parsed.threads || [];
+        resolve(threads.map(t => ({
+          id: t.id,
+          date: t.date,
+          from: t.from,
+          subject: t.subject,
+          labels: t.labels || [],
+          messageCount: t.messageCount || 1
+        })));
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+}
+
 if (!fs.existsSync(DATA_FILE)) writeJson(DATA_FILE, {});
 if (!fs.existsSync(ACTIVITY_FILE)) writeJson(ACTIVITY_FILE, []);
 
@@ -94,6 +119,24 @@ const server = http.createServer(async (req, res) => {
     const city = u.searchParams.get('city') || 'Stockholm';
     try { return send(res, 200, await getWeather(city)); }
     catch { return send(res, 502, { error: 'Weather fetch failed' }); }
+  }
+
+  if (req.method === 'GET' && u.pathname === '/mc/emails') {
+    const account = u.searchParams.get('account') || 'jacob.qvisth@gmail.com';
+    const max = Number(u.searchParams.get('max') || 10);
+    try {
+      const emails = await getImportantEmails(account, max);
+      const unread = emails.filter(e => (e.labels || []).includes('UNREAD')).length;
+      return send(res, 200, {
+        account,
+        count: emails.length,
+        unread,
+        emails,
+        fetchedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      return send(res, 502, { error: 'Email fetch failed', detail: e.message });
+    }
   }
 
   if (req.method === 'GET' && u.pathname === '/mc/activity') {

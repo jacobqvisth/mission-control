@@ -25,6 +25,7 @@ Open: http://localhost:8899
 - `GET /mc/data`
 - `POST /mc/data`
 - `GET /mc/weather?city=Stockholm`
+- `GET /mc/emails?account=jacob.qvisth@gmail.com&max=12`
 - `GET /mc/activity`
 - `POST /mc/activity`
 
