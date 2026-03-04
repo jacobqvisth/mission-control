@@ -428,7 +428,10 @@
     async function renderSessions() {
       const el = document.getElementById('sessionList');
       try {
-        const r = await fetch('/mc/sessions?active=10080');
+        let r = await fetch('/api/sessions?active=10080');
+        if (!r.ok) {
+          r = await fetch('/mc/sessions?active=10080');
+        }
         if (!r.ok) throw new Error('unavailable');
         const data = await r.json();
         const sessions = (data.sessions || []).filter(s => s.surface === 'telegram' || s.key.includes(':main'));
@@ -454,8 +457,8 @@
           <div class="item">
             <div>
               <strong>No local runtime connected</strong>
-              <div class="small">This cloud site cannot read your private OpenClaw session store directly.</div>
-              <div class="small">Use local Mission Control for live sessions: <a href="http://localhost:8899" target="_blank" rel="noopener">http://localhost:8899</a></div>
+              <div class="small">Cloud needs a secure bridge to your local runtime (MC_BRIDGE_URL + MC_BRIDGE_TOKEN).</div>
+              <div class="small">Until that is configured, use local Mission Control: <a href="http://localhost:8899" target="_blank" rel="noopener">http://localhost:8899</a></div>
             </div>
           </div>
         `;

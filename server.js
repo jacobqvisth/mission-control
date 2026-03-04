@@ -194,6 +194,20 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && u.pathname === '/mc/sessions-bridge') {
+    const expected = process.env.MC_BRIDGE_TOKEN || '';
+    const provided = req.headers['x-mc-bridge-token'] || '';
+    if (!expected || provided !== expected) {
+      return send(res, 401, { error: 'Unauthorized bridge request' });
+    }
+    const active = Number(u.searchParams.get('active') || 1440);
+    try {
+      return send(res, 200, await getSessions(active));
+    } catch (e) {
+      return send(res, 502, { error: 'Session fetch failed', detail: e.message });
+    }
+  }
+
   if (req.method === 'GET' && u.pathname === '/mc/activity') {
     const activity = readJson(ACTIVITY_FILE, []);
     return send(res, 200, activity.slice(-50).reverse());

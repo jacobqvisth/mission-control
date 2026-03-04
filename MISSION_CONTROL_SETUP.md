@@ -29,6 +29,7 @@ Open: http://localhost:8899
 - `GET /mc/activity`
 - `POST /mc/activity`
 - `GET /mc/sessions?active=10080`
+- `GET /mc/sessions-bridge?active=10080` (requires `x-mc-bridge-token` header)
 
 ## 4) Optional auto-start on macOS login
 
