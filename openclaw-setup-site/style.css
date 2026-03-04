@@ -1,0 +1,131 @@
+:root {
+  --bg: #0b1020;
+  --bg-soft: #121a31;
+  --text: #e8ecff;
+  --muted: #adb7d9;
+  --brand: #73d2ff;
+  --accent: #8bffb7;
+  --border: #243054;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, #0e1428 35%, #0b1020 100%);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.hero {
+  padding: 1.5rem 1rem 3rem;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(70% 120% at 50% -20%, rgba(115, 210, 255, 0.18), transparent 70%);
+}
+
+.nav {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.hero-inner {
+  max-width: 1000px;
+  margin: 3rem auto 0;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.2;
+  margin: 0 0 0.8rem;
+}
+
+h2 { margin-top: 0; }
+
+.hero p {
+  max-width: 65ch;
+  color: var(--muted);
+}
+
+.hero-actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+
+main {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: rgba(18, 26, 49, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.btn {
+  display: inline-block;
+  color: #00121a;
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  text-decoration: none;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 0.62rem 1rem;
+  cursor: pointer;
+}
+
+.btn-small { padding: 0.45rem 0.8rem; font-size: 0.9rem; }
+
+.btn-ghost {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+pre {
+  margin: 0.6rem 0;
+  overflow-x: auto;
+  background: #0a0f1d;
+  border: 1px solid #1e2a4a;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+.note { color: var(--muted); font-size: 0.95rem; }
+
+footer {
+  max-width: 1000px;
+  margin: 1rem auto 2rem;
+  padding: 0 1rem;
+  color: var(--muted);
+}
+
+a { color: var(--brand); }
+
+details {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.65rem;
+  background: #0d152b;
+}
+
+summary { cursor: pointer; font-weight: 600; }

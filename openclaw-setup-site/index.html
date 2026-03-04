@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenClaw Setup Guide</title>
+    <meta
+      name="description"
+      content="A practical step-by-step guide to install and set up OpenClaw on your machine."
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="nav">
+        <div class="brand">🦞 OpenClaw Setup</div>
+        <a class="btn btn-small" href="#quickstart">Quickstart</a>
+      </nav>
+
+      <div class="hero-inner">
+        <h1>Set up OpenClaw in minutes</h1>
+        <p>
+          A clean, practical onboarding page for new users: install the CLI,
+          start the gateway, connect channels, and verify everything works.
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="#quickstart">Start setup</a>
+          <a class="btn btn-ghost" href="https://docs.openclaw.ai" target="_blank" rel="noreferrer">Docs</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="quickstart" class="card">
+        <h2>1) Quickstart checklist</h2>
+        <ol>
+          <li><strong>Install OpenClaw CLI</strong></li>
+          <li><strong>Run the setup wizard</strong></li>
+          <li><strong>Start the gateway</strong></li>
+          <li><strong>Check status and health</strong></li>
+          <li><strong>Connect your first channel (Telegram/WhatsApp/etc.)</strong></li>
+        </ol>
+      </section>
+
+      <section class="grid-2">
+        <article class="card">
+          <h2>2) Install</h2>
+          <p>Use your preferred package manager and verify the CLI is available:</p>
+<pre><code># Example: check available commands
+openclaw help
+
+# Verify installation
+openclaw --version</code></pre>
+          <p class="note">If install steps change, always follow the official docs.</p>
+        </article>
+
+        <article class="card">
+          <h2>3) First-time configuration</h2>
+<pre><code># Guided setup
+openclaw setup
+
+# Or full interactive configuration
+openclaw configure</code></pre>
+          <p>These commands help configure auth, model, channels, and workspace.</p>
+        </article>
+      </section>
+
+      <section class="grid-2">
+        <article class="card">
+          <h2>4) Start the gateway service</h2>
+<pre><code>openclaw gateway start
+openclaw gateway status</code></pre>
+          <p>
+            The gateway is the runtime that powers messaging, tool use, and
+            sessions.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>5) Health checks</h2>
+<pre><code>openclaw status
+openclaw doctor
+openclaw logs --follow</code></pre>
+          <p>Use these to confirm channels and agent runtime are healthy.</p>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>6) Connect channels</h2>
+        <p>Pick one channel to start with and test message flow:</p>
+        <ul>
+          <li><strong>Telegram:</strong> configure bot token, set group/mention policy</li>
+          <li><strong>WhatsApp:</strong> link personal account and verify session state</li>
+          <li><strong>Others:</strong> use <code>openclaw channels --help</code></li>
+        </ul>
+<pre><code>openclaw channels --help
+openclaw status --deep</code></pre>
+      </section>
+
+      <section class="card">
+        <h2>Common troubleshooting</h2>
+        <details>
+          <summary>Gateway not reachable</summary>
+          <p>Check service status and restart:</p>
+<pre><code>openclaw gateway status
+openclaw gateway restart</code></pre>
+        </details>
+        <details>
+          <summary>Channel messages not flowing</summary>
+          <p>Run deep status and inspect policy settings (allowlist/mention rules).</p>
+<pre><code>openclaw status --deep</code></pre>
+        </details>
+        <details>
+          <summary>Need command reference</summary>
+          <p>Use CLI help and docs:</p>
+<pre><code>openclaw help
+openclaw docs</code></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Built for onboarding. Official docs:
+        <a href="https://docs.openclaw.ai" target="_blank" rel="noreferrer">docs.openclaw.ai</a>
+      </p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
