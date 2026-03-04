@@ -44,7 +44,20 @@ Stop it:
 launchctl unload ~/Library/LaunchAgents/com.missioncontrol.server.plist
 ```
 
-## 5) Next upgrade ideas
+## 5) Vercel production setup
+
+1. Open your Vercel project → **Settings → Environment Variables**.
+2. Add variables from `.env.example`.
+3. Deploy (or redeploy) after saving env vars.
+4. Validate configuration at:
+
+- `https://<your-domain>/api/health`
+
+Expected:
+- `200 OK` when all required vars are present.
+- `503` with a list of missing required vars when setup is incomplete.
+
+## 6) Next upgrade ideas
 
 - Add Revenue module tab
 - Add AI Agent Command Center tab
