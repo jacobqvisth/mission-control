@@ -79,8 +79,23 @@
 
     .notes-meta { display:flex; justify-content: space-between; color: var(--muted); font-size: .84rem; margin-top: .5rem; }
 
+    .cc-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: .9rem; }
+    .cc-col { border:1px solid var(--border); border-radius: 12px; padding: .75rem; background: rgba(255,255,255,.02); }
+    .cc-col-title { color: #9edfcf; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .6rem; }
+    .agent-card { border:1px solid var(--border); border-radius: 12px; padding: .7rem; background: rgba(7,18,22,.35); margin-bottom: .6rem; }
+    .agent-head { display:flex; justify-content:space-between; gap:.6rem; align-items:flex-start; cursor:pointer; }
+    .agent-name { font-weight:700; }
+    .agent-title { color: var(--muted); font-size:.8rem; }
+    .agent-model { margin-top:.55rem; }
+    .status-pill { display:inline-flex; align-items:center; gap:.35rem; font-size:.74rem; border-radius:999px; padding:.18rem .5rem; margin-top:.5rem; border:1px solid var(--border); }
+    .status-pill.online,.status-pill.ready { color:#b9ffd9; background: rgba(39,209,127,.16); }
+    .status-pill.busy { color:#ffe2a8; background: rgba(255,179,71,.15); }
+    .status-pill.offline { color:#d3d3df; background: rgba(160,160,178,.15); }
+    .agent-send { margin-top:.55rem; width:100%; }
+
     @media (max-width: 1100px) {
       .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .cc-grid { grid-template-columns: 1fr; }
       .dashboard-row { grid-template-columns: 1fr; }
       .kanban { grid-template-columns: 1fr; }
       .topbar { grid-template-columns: 1fr; }
@@ -143,7 +158,7 @@
     <section id="command-center">
       <div class="glass card">
         <h3>🏢 Command Center</h3>
-        <div id="agentGrid" class="grid-4"></div>
+        <div id="agentGrid" class="cc-grid"></div>
       </div>
       <div class="glass card" style="margin-top:1rem;">
         <h3>Executive Decisions</h3>
@@ -212,13 +227,18 @@
       },
       notes: '',
       agents: [
-        { id:'chief', name:'Chief of Staff', role:'Orchestrator', status:'online', model:'gpt-5.3-codex', lastActive:Date.now(), capabilities:['Prioritization','Coordination','Decision support'], performance:'Strong at synthesis and sequencing.', activity:[{text:'Aligned today priorities', ts: Date.now()}] },
-        { id:'inbox', name:'Inbox Analyst', role:'Email Triage', status:'online', model:'gpt-5.3-codex', lastActive:Date.now()-600000, capabilities:['Important-email triage','Draft suggestions','Follow-up flags'], performance:'High precision on urgent mail.', activity:[{text:'Flagged 2 important unread emails', ts: Date.now()-600000}] },
-        { id:'pm', name:'Execution PM', role:'Projects & Tasks', status:'busy', model:'gpt-5.3-codex', lastActive:Date.now()-1800000, capabilities:['Kanban hygiene','Weekly plans','Risk spotting'], performance:'Keeps project board clear.', activity:[{text:'Moved 3 tasks to In Progress', ts: Date.now()-1800000}] },
-        { id:'scout', name:'Research Scout', role:'Intel & Research', status:'offline', model:'gpt-5.3-codex', lastActive:Date.now()-7200000, capabilities:['Web research','Source summary','Opportunity scans'], performance:'Fast, broad scans with citations.', activity:[{text:'Prepared market snapshot', ts: Date.now()-7200000}] }
+        { id:'atlas', dept:'Engineering', name:'atlas', title:'CTO / Coder', status:'ready', model:'claude-opus-4.6', lastActive:Date.now(), capabilities:['Build features','Refactor code','Ship fixes'], performance:'High quality coding output.', activity:[{text:'Reviewed mission control structure', ts: Date.now()}] },
+        { id:'ops', dept:'Engineering', name:'ops', title:'DevOps / SysAdmin', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-1500000, capabilities:['Infra checks','Deploy scripts','Monitoring'], performance:'Reliable operations support.', activity:[{text:'Verified WhatsApp + Telegram channels', ts: Date.now()-1500000}] },
+        { id:'iris', dept:'Design & UX', name:'iris', title:'Creative Director', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-2400000, capabilities:['UI polish','Design critique','UX copy'], performance:'Great at visual cleanup.', activity:[{text:'Proposed command center layout tweaks', ts: Date.now()-2400000}] },
+        { id:'pixel', dept:'Design & UX', name:'pixel', title:'Image Artist', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-5400000, capabilities:['Visual assets','Prompt-to-image ideas','Style systems'], performance:'Fast concept generation.', activity:[{text:'Drafted card visual style options', ts: Date.now()-5400000}] },
+        { id:'nexus', dept:'Product', name:'nexus', title:'Project Manager', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-700000, capabilities:['Roadmaps','Prioritization','Task decomposition'], performance:'Strong sequencing logic.', activity:[{text:'Updated sprint priorities', ts: Date.now()-700000}] },
+        { id:'sentinel', dept:'Product', name:'sentinel', title:'QA Director', status:'ready', model:'claude-opus-4.6', lastActive:Date.now()-3600000, capabilities:['Test planning','Risk detection','Acceptance criteria'], performance:'Excellent edge-case spotting.', activity:[{text:'Flagged missing email-state tests', ts: Date.now()-3600000}] },
+        { id:'herald', dept:'Marketing & Growth', name:'herald', title:'Marketing', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-2600000, capabilities:['Campaign ideas','Positioning','Growth loops'], performance:'Good momentum ideas.', activity:[{text:'Prepared launch messaging draft', ts: Date.now()-2600000}] },
+        { id:'quill', dept:'Marketing & Growth', name:'quill', title:'Content Lead', status:'ready', model:'claude-opus-4.6', lastActive:Date.now()-4300000, capabilities:['Long-form writing','Editorial planning','Repurposing'], performance:'Strong narrative quality.', activity:[{text:'Outlined weekly content plan', ts: Date.now()-4300000}] },
+        { id:'scout', dept:'Marketing & Growth', name:'scout', title:'Research', status:'offline', model:'gemini-2.5-pro', lastActive:Date.now()-7200000, capabilities:['Market scans','Competitor watch','Source summaries'], performance:'Fast broad scans.', activity:[{text:'Pulled competitor updates', ts: Date.now()-7200000}] }
       ],
       decisions: [
-        { ts: Date.now()-3600000, question:'Which channels should be primary?', decision:'Use Telegram + WhatsApp; defer iMessage.', agents:['Chief of Staff','Inbox Analyst'] }
+        { ts: Date.now()-3600000, question:'Which channels should be primary?', decision:'Use Telegram + WhatsApp; defer iMessage.', agents:['atlas','nexus','herald'] }
       ],
       timeline: [
         { title: 'Phase 1: Foundation', range: 'Now', desc: 'Core channels and alerts online', milestones: ['Telegram + WhatsApp online', 'Gmail monitoring online'], current: true },
@@ -228,6 +248,9 @@
     };
 
     const state = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(defaults);
+    if (!Array.isArray(state.agents) || !state.agents.length || !('dept' in state.agents[0])) {
+      state.agents = structuredClone(defaults.agents);
+    }
     const save = () => localStorage.setItem(KEY, JSON.stringify(state));
     const fmt = ts => new Date(ts).toLocaleString();
 
@@ -398,18 +421,53 @@
       `).join('');
     }
 
+    const MODEL_OPTIONS = ['claude-opus-4.6','claude-sonnet-4.6','gpt-5.3-codex','gemini-2.5-pro','gemini-2.0-flash'];
     let selectedAgentId = null;
     function renderCommandCenter() {
       const grid = document.getElementById('agentGrid');
-      grid.innerHTML = state.agents.map(a => `
-        <div class="glass metric" data-agent="${a.id}" style="cursor:pointer;">
-          <div class="m-label">${a.role}</div>
-          <div class="m-value" style="font-size:1.05rem;">${a.name}</div>
-          <div class="small">Model: ${a.model}</div>
-          <div class="small">Status: ${a.status} · Last: ${new Date(a.lastActive).toLocaleTimeString()}</div>
-        </div>
-      `).join('');
-      grid.querySelectorAll('[data-agent]').forEach(el => el.onclick = () => openAgentPanel(el.dataset.agent));
+      const depts = ['Engineering','Design & UX','Product','Marketing & Growth'];
+      grid.innerHTML = depts.map(dept => {
+        const agents = state.agents.filter(a => a.dept === dept);
+        return `
+          <div class="cc-col">
+            <div class="cc-col-title">${dept}</div>
+            ${agents.map(a => `
+              <div class="agent-card" data-agent="${a.id}">
+                <div class="agent-head" data-open="${a.id}">
+                  <div>
+                    <div class="agent-name">${a.name}</div>
+                    <div class="agent-title">${a.title}</div>
+                  </div>
+                  <div class="small">${new Date(a.lastActive).toLocaleTimeString()}</div>
+                </div>
+                <div class="agent-model">
+                  <select data-model="${a.id}">
+                    ${MODEL_OPTIONS.map(m => `<option value="${m}" ${a.model===m?'selected':''}>${m}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="status-pill ${a.status}"><span>●</span><span>${a.status.toUpperCase()}</span></div>
+                <button class="btn agent-send" data-send="${a.id}">Send Task</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('[data-open]').forEach(el => el.onclick = () => openAgentPanel(el.dataset.open));
+      grid.querySelectorAll('select[data-model]').forEach(sel => sel.onchange = () => {
+        const a = state.agents.find(x => x.id === sel.dataset.model); if (!a) return;
+        a.model = sel.value;
+        a.lastActive = Date.now();
+        a.activity = a.activity || [];
+        a.activity.push({ text: `Model switched to ${sel.value}`, ts: Date.now() });
+        save();
+        renderCommandCenter();
+      });
+      grid.querySelectorAll('button[data-send]').forEach(btn => btn.onclick = () => {
+        selectedAgentId = btn.dataset.send;
+        document.getElementById('taskText').value = '';
+        document.getElementById('taskModal').style.display = 'block';
+      });
 
       document.getElementById('decisionList').innerHTML = state.decisions.map(d => `
         <div class="item">
@@ -427,7 +485,7 @@
       const a = state.agents.find(x => x.id === agentId); if (!a) return;
       selectedAgentId = a.id;
       document.getElementById('panelName').textContent = a.name;
-      document.getElementById('panelRole').textContent = `${a.role} · ${a.status}`;
+      document.getElementById('panelRole').textContent = `${a.dept} · ${a.title} · ${a.status}`;
       document.getElementById('panelModel').textContent = `Model: ${a.model} · Last active: ${new Date(a.lastActive).toLocaleString()}`;
       document.getElementById('panelCaps').innerHTML = a.capabilities.map(c => `<li>${c}</li>`).join('');
       document.getElementById('panelActivity').innerHTML = (a.activity || []).slice().reverse().map(it => `<div class="item"><span>${it.text}</span><span class="small">${new Date(it.ts).toLocaleTimeString()}</span></div>`).join('') || '<div class="small">No activity yet.</div>';
