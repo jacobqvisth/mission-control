@@ -158,11 +158,12 @@
     <section id="command-center">
       <div class="glass card">
         <h3>🏢 Command Center</h3>
-        <div id="agentGrid" class="cc-grid"></div>
-      </div>
-      <div class="glass card" style="margin-top:1rem;">
-        <h3>Executive Decisions</h3>
-        <div id="decisionList" class="list"></div>
+        <div class="small" style="margin-bottom:.75rem;">Only live, verifiable integrations are shown here.</div>
+        <div id="liveChecks" class="list"></div>
+        <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button id="refreshChecks" class="btn">Refresh checks</button>
+          <a class="btn ghost" href="/api/health" target="_blank" rel="noopener">Open /api/health</a>
+        </div>
       </div>
     </section>
 
@@ -176,37 +177,6 @@
         </div>
       </div>
     </section>
-  </div>
-
-  <div id="agentPanel" class="glass" style="display:none;position:fixed;top:80px;right:20px;width:420px;max-width:90vw;z-index:20;padding:1rem;">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:.8rem;">
-      <strong id="panelName">Agent</strong>
-      <button id="closePanel" class="btn ghost">Close</button>
-    </div>
-    <div class="small" id="panelRole" style="margin:.35rem 0;"></div>
-    <div class="small" id="panelModel"></div>
-    <div style="margin:.75rem 0;">
-      <strong>Capabilities</strong>
-      <ul id="panelCaps"></ul>
-    </div>
-    <div>
-      <strong>Recent activity</strong>
-      <div id="panelActivity" class="list" style="max-height:180px;"></div>
-    </div>
-    <div style="margin-top:.8rem;display:flex;gap:.5rem;">
-      <button id="sendTaskBtn" class="btn">Send Task</button>
-    </div>
-  </div>
-
-  <div id="taskModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30;">
-    <div class="glass" style="max-width:560px;margin:12vh auto;padding:1rem;">
-      <h3 style="margin-top:0;">Send Task</h3>
-      <textarea id="taskText" rows="6" placeholder="Write task for selected agent..."></textarea>
-      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.6rem;">
-        <button id="cancelTask" class="btn ghost">Cancel</button>
-        <button id="confirmTask" class="btn">Save Task</button>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -226,20 +196,6 @@
         done: [],
       },
       notes: '',
-      agents: [
-        { id:'atlas', dept:'Engineering', name:'atlas', title:'CTO / Coder', status:'ready', model:'claude-opus-4.6', lastActive:Date.now(), capabilities:['Build features','Refactor code','Ship fixes'], performance:'High quality coding output.', activity:[{text:'Reviewed mission control structure', ts: Date.now()}] },
-        { id:'ops', dept:'Engineering', name:'ops', title:'DevOps / SysAdmin', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-1500000, capabilities:['Infra checks','Deploy scripts','Monitoring'], performance:'Reliable operations support.', activity:[{text:'Verified WhatsApp + Telegram channels', ts: Date.now()-1500000}] },
-        { id:'iris', dept:'Design & UX', name:'iris', title:'Creative Director', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-2400000, capabilities:['UI polish','Design critique','UX copy'], performance:'Great at visual cleanup.', activity:[{text:'Proposed command center layout tweaks', ts: Date.now()-2400000}] },
-        { id:'pixel', dept:'Design & UX', name:'pixel', title:'Image Artist', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-5400000, capabilities:['Visual assets','Prompt-to-image ideas','Style systems'], performance:'Fast concept generation.', activity:[{text:'Drafted card visual style options', ts: Date.now()-5400000}] },
-        { id:'nexus', dept:'Product', name:'nexus', title:'Project Manager', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-700000, capabilities:['Roadmaps','Prioritization','Task decomposition'], performance:'Strong sequencing logic.', activity:[{text:'Updated sprint priorities', ts: Date.now()-700000}] },
-        { id:'sentinel', dept:'Product', name:'sentinel', title:'QA Director', status:'ready', model:'claude-opus-4.6', lastActive:Date.now()-3600000, capabilities:['Test planning','Risk detection','Acceptance criteria'], performance:'Excellent edge-case spotting.', activity:[{text:'Flagged missing email-state tests', ts: Date.now()-3600000}] },
-        { id:'herald', dept:'Marketing & Growth', name:'herald', title:'Marketing', status:'ready', model:'claude-sonnet-4.6', lastActive:Date.now()-2600000, capabilities:['Campaign ideas','Positioning','Growth loops'], performance:'Good momentum ideas.', activity:[{text:'Prepared launch messaging draft', ts: Date.now()-2600000}] },
-        { id:'quill', dept:'Marketing & Growth', name:'quill', title:'Content Lead', status:'ready', model:'claude-opus-4.6', lastActive:Date.now()-4300000, capabilities:['Long-form writing','Editorial planning','Repurposing'], performance:'Strong narrative quality.', activity:[{text:'Outlined weekly content plan', ts: Date.now()-4300000}] },
-        { id:'scout', dept:'Marketing & Growth', name:'scout', title:'Research', status:'offline', model:'gemini-2.5-pro', lastActive:Date.now()-7200000, capabilities:['Market scans','Competitor watch','Source summaries'], performance:'Fast broad scans.', activity:[{text:'Pulled competitor updates', ts: Date.now()-7200000}] }
-      ],
-      decisions: [
-        { ts: Date.now()-3600000, question:'Which channels should be primary?', decision:'Use Telegram + WhatsApp; defer iMessage.', agents:['atlas','nexus','herald'] }
-      ],
       timeline: [
         { title: 'Phase 1: Foundation', range: 'Now', desc: 'Core channels and alerts online', milestones: ['Telegram + WhatsApp online', 'Gmail monitoring online'], current: true },
         { title: 'Phase 2: Operating Rhythm', range: 'Next 2 weeks', desc: 'Daily brief cadence and decision logging', milestones: ['Important email rules tuned', 'Morning + evening brief'], current: false },
@@ -248,9 +204,6 @@
     };
 
     const state = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(defaults);
-    if (!Array.isArray(state.agents) || !state.agents.length || !('dept' in state.agents[0])) {
-      state.agents = structuredClone(defaults.agents);
-    }
     const save = () => localStorage.setItem(KEY, JSON.stringify(state));
     const fmt = ts => new Date(ts).toLocaleString();
 
@@ -421,99 +374,43 @@
       `).join('');
     }
 
-    const MODEL_OPTIONS = ['claude-opus-4.6','claude-sonnet-4.6','gpt-5.3-codex','gemini-2.5-pro','gemini-2.0-flash'];
-    let selectedAgentId = null;
-    function renderCommandCenter() {
-      const grid = document.getElementById('agentGrid');
-      const depts = ['Engineering','Design & UX','Product','Marketing & Growth'];
-      grid.innerHTML = depts.map(dept => {
-        const agents = state.agents.filter(a => a.dept === dept);
-        return `
-          <div class="cc-col">
-            <div class="cc-col-title">${dept}</div>
-            ${agents.map(a => `
-              <div class="agent-card" data-agent="${a.id}">
-                <div class="agent-head" data-open="${a.id}">
-                  <div>
-                    <div class="agent-name">${a.name}</div>
-                    <div class="agent-title">${a.title}</div>
-                  </div>
-                  <div class="small">${new Date(a.lastActive).toLocaleTimeString()}</div>
-                </div>
-                <div class="agent-model">
-                  <select data-model="${a.id}">
-                    ${MODEL_OPTIONS.map(m => `<option value="${m}" ${a.model===m?'selected':''}>${m}</option>`).join('')}
-                  </select>
-                </div>
-                <div class="status-pill ${a.status}"><span>●</span><span>${a.status.toUpperCase()}</span></div>
-                <button class="btn agent-send" data-send="${a.id}">Send Task</button>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }).join('');
+    async function renderCommandCenter() {
+      const checks = [];
 
-      grid.querySelectorAll('[data-open]').forEach(el => el.onclick = () => openAgentPanel(el.dataset.open));
-      grid.querySelectorAll('select[data-model]').forEach(sel => sel.onchange = () => {
-        const a = state.agents.find(x => x.id === sel.dataset.model); if (!a) return;
-        a.model = sel.value;
-        a.lastActive = Date.now();
-        a.activity = a.activity || [];
-        a.activity.push({ text: `Model switched to ${sel.value}`, ts: Date.now() });
-        save();
-        renderCommandCenter();
-      });
-      grid.querySelectorAll('button[data-send]').forEach(btn => btn.onclick = () => {
-        selectedAgentId = btn.dataset.send;
-        document.getElementById('taskText').value = '';
-        document.getElementById('taskModal').style.display = 'block';
-      });
+      try {
+        const r = await fetch('/api/health');
+        const data = await r.json();
+        checks.push({
+          name: '/api/health',
+          ok: r.ok && data.ok === true,
+          detail: r.ok ? 'Environment check is healthy' : `Missing: ${(data?.checks?.required?.missing || []).join(', ') || 'unknown'}`
+        });
+      } catch {
+        checks.push({ name: '/api/health', ok: false, detail: 'Endpoint unavailable' });
+      }
 
-      document.getElementById('decisionList').innerHTML = state.decisions.map(d => `
+      try {
+        const r = await fetch('/mc/status');
+        if (r.ok) {
+          const data = await r.json();
+          checks.push({ name: '/mc/status', ok: true, detail: `Local server ${data.health || 'online'}` });
+        } else {
+          checks.push({ name: '/mc/status', ok: false, detail: 'Local server not connected on this deployment' });
+        }
+      } catch {
+        checks.push({ name: '/mc/status', ok: false, detail: 'Local server not reachable from this host' });
+      }
+
+      const el = document.getElementById('liveChecks');
+      el.innerHTML = checks.map(c => `
         <div class="item">
           <div>
-            <div><strong>${d.question}</strong></div>
-            <div class="small">${d.decision}</div>
-            <div class="small">Consulted: ${d.agents.join(', ')}</div>
+            <strong>${c.name}</strong>
+            <div class="small">${c.detail}</div>
           </div>
-          <div class="small">${new Date(d.ts).toLocaleDateString()}</div>
+          <div class="small">${c.ok ? 'OK' : 'ISSUE'}</div>
         </div>
       `).join('');
-    }
-
-    function openAgentPanel(agentId) {
-      const a = state.agents.find(x => x.id === agentId); if (!a) return;
-      selectedAgentId = a.id;
-      document.getElementById('panelName').textContent = a.name;
-      document.getElementById('panelRole').textContent = `${a.dept} · ${a.title} · ${a.status}`;
-      document.getElementById('panelModel').textContent = `Model: ${a.model} · Last active: ${new Date(a.lastActive).toLocaleString()}`;
-      document.getElementById('panelCaps').innerHTML = a.capabilities.map(c => `<li>${c}</li>`).join('');
-      document.getElementById('panelActivity').innerHTML = (a.activity || []).slice().reverse().map(it => `<div class="item"><span>${it.text}</span><span class="small">${new Date(it.ts).toLocaleTimeString()}</span></div>`).join('') || '<div class="small">No activity yet.</div>';
-      document.getElementById('agentPanel').style.display = 'block';
-    }
-
-    function wireCommandCenter() {
-      document.getElementById('closePanel').onclick = () => document.getElementById('agentPanel').style.display = 'none';
-      document.getElementById('sendTaskBtn').onclick = () => {
-        document.getElementById('taskText').value = '';
-        document.getElementById('taskModal').style.display = 'block';
-      };
-      document.getElementById('cancelTask').onclick = () => document.getElementById('taskModal').style.display = 'none';
-      document.getElementById('confirmTask').onclick = () => {
-        const txt = document.getElementById('taskText').value.trim();
-        if (!txt || !selectedAgentId) return;
-        const a = state.agents.find(x => x.id === selectedAgentId); if (!a) return;
-        a.activity = a.activity || [];
-        a.activity.push({ text: `Task queued: ${txt}`, ts: Date.now() });
-        a.lastActive = Date.now();
-        a.status = 'busy';
-        state.activity.unshift({ text: `Command Center: task sent to ${a.name}`, ts: Date.now() });
-        save();
-        renderCommandCenter();
-        renderActivity();
-        openAgentPanel(a.id);
-        document.getElementById('taskModal').style.display = 'none';
-      };
     }
 
     function wireNotes() {
@@ -542,7 +439,8 @@
 
     setInterval(renderClock, 1000);
     setInterval(fetchEmails, 120000);
-    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); renderCommandCenter(); wireCommandCenter(); wireNotes(); fetchEmails();
+    renderTabs(); renderClock(); renderMetrics(); renderActivity(); renderPriorities(); renderKanban(); renderTimeline(); renderCommandCenter(); wireNotes(); fetchEmails();
+    document.getElementById('refreshChecks').onclick = renderCommandCenter;
   </script>
 </body>
 </html>
